@@ -1,0 +1,60 @@
+-- Procedures
+
+DELIMITER $$
+
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `get_last_transactions_amount`()   
+BEGIN
+SELECT * FROM `transactions` ORDER BY `transaction_date` DESC LIMIT 1;
+END$$
+
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `myorders_for_owner`()   
+BEGIN
+SELECT o.`id`, o.item_id,o.`quantity`, o.`quantity`*o.`unit_price` AS `unit_price`, o.`ordered_at`,o.user_id,o.is_canceled  
+FROM `orders` o, `product` p, `user` u, `category` c 
+WHERE o.`item_id` = p.`id` AND o.`user_id` = u.`id` AND p.`category_id` = c.`id` AND o.`is_canceled` = 0
+ORDER BY o.`ordered_at` ASC;
+END$$
+
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `profile_update` (
+IN `user_registered_no` VARCHAR(5), 
+IN `user_name` VARCHAR(100), 
+IN `user_mobile` CHAR(10), 
+IN `user_email` VARCHAR(100))
+BEGIN
+UPDATE `user` SET `name`= user_name,`mobile`= user_mobile,`email`= user_email 
+WHERE `registered_no` = user_registered_no;
+END$$
+
+
+
+
+-- Functions------
+
+CREATE DEFINER=`root`@`localhost` FUNCTION `calculate_transactions_summery` () RETURNS FLOAT  BEGIN
+DECLARE transactions_amount FLOAT DEFAULT 0.0;
+SELECT SUM(`quantity`*`total_price`) INTO transactions_amount 
+FROM `orders_log` 
+WHERE DATE(`delivered_at`) = DATE(NOW()) 
+GROUP BY `delivered_at`;
+RETURN (transactions_amount);
+END$$
+
+
+
+-- Events
+
+CREATE DEFINER=`root`@`localhost` EVENT `add_daily_transaction_summery` 
+ON SCHEDULE EVERY 1 DAY STARTS '2022-10-10 23:59:55' 
+ON COMPLETION PRESERVE ENABLE DO 
+INSERT INTO `transactions`(`transaction_date`, `total_amount`) 
+VALUES (DATE(NOW()), calculate_transactions_summery());
+
+
+
+
+DELIMITER ;
+
+
