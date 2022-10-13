@@ -1,0 +1,36 @@
+//inventory_for_customers view
+	
+
+	DROP TABLE IF EXISTS `inventory_for_customers`;
+	
+
+	CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost`
+	SQL SECURITY DEFINER VIEW `inventory_for_customers`
+	AS SELECT `i`.`id` AS `id`, `i`.`product_id` AS `product_id`, `c`.`type` AS `type`, `i`.`unit_price` AS `unit_price`, `i`.`quantity` AS `quantity`, `i`.`inserted_at`
+	AS `inserted_at`, `i`.`expiry_at` AS `expiry_at`, `i`.`is_deleted` AS `is_deleted`
+	FROM ((`inventory` `i` join `product` `p`) join `category` `c`)
+	WHERE ((`i`.`product_id` = `p`.`id`) AND (`p`.`category_id` = `c`.`id`) AND (`p`.`is_hide` = 0) AND (`i`.`quantity` > 0)
+	AND (`i`.`is_deleted` = 0) AND (`i`.`expiry_at` > now()))
+	ORDER BY rand() ASC ;
+	
+
+	-- --------------------------------------------------------
+	
+
+	// PROCEDURE place_order
+	DELIMITER $
+	CREATE DEFINER=`root`@`localhost` PROCEDURE `place_order` (IN `inventory_id` INT, IN `order_quantity` INT, IN `order_unit_price` FLOAT, IN `user_id` INT) BEGIN
+	
+
+	INSERT INTO `orders`(`item_id`, `quantity`, `unit_price`, `user_id`) VALUES (inventory_id, order_quantity, order_unit_price, user_id);
+	
+
+	END$
+	DELIMITER ;
+	
+
+	
+
+	
+
+
