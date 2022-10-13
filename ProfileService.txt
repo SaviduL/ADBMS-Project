@@ -1,0 +1,50 @@
+CREATE DEFINER=`root`@`localhost` PROCEDURE `profile_password_update` (IN `user_registered_no` VARCHAR(5), IN `user_old_password` VARCHAR(255), IN `user_new_password` VARCHAR(255))   BEGIN
+
+DECLARE  status VARCHAR(255);
+
+DECLARE pwd VARCHAR(255);
+
+IF user_check_old_password(user_registered_no, user_old_password) = 1 THEN
+
+SET pwd = SHA1(user_new_password);
+
+UPDATE `login` SET `password`= pwd WHERE `id` = (SELECT `id` FROM `user` WHERE `registered_no` = user_registered_no AND `is_deleted` = 0 LIMIT 1);
+
+SET status = 'Updated';
+
+ELSE
+
+SET status = 'Old password Incorrect';
+
+END IF;
+
+SELECT status;
+
+END$$
+
+
+CREATE DEFINER=`root`@`localhost` FUNCTION `user_check_old_password` (`user_registered_no` VARCHAR(5), `user_old_password` VARCHAR(255)) RETURNS INT  BEGIN
+
+DECLARE  pwd VARCHAR(255);
+
+DECLARE  status INT;
+
+SELECT l.`password` INTO pwd FROM `user` u, `login` l WHERE u.`id` = l.`id` AND u.`registered_no` = user_registered_no AND `is_deleted` = 0 LIMIT 1;
+
+IF pwd = user_old_password THEN
+
+SET status = 1;
+
+ELSE
+
+SET status = 0;
+
+END IF;
+
+RETURN (status);
+
+END$$
+
+DELIMITER ;
+
+
