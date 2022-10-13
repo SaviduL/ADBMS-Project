@@ -1,0 +1,35 @@
+
+------user account create procedure-------
+DELIMITER $
+CREATE PROCEDURE `user_account_create` (IN `user_registered_no` VARCHAR(5), IN `user_name` VARCHAR(100), IN `user_role_id` INT)   
+BEGIN
+DECLARE result int;
+SET result=1;
+INSERT INTO `user`(`registered_no`, `name`, `role_id`) VALUES (user_registered_no , user_name, user_role_id);
+SELECT *FROM user ORDER BY id desc limit 1;
+END $
+DELIMITER ;
+
+-------user account delete procedure--------
+DELIMITER $
+CREATE PROCEDURE `user_account_delete` (IN `user_id` VARCHAR(5))   
+BEGIN
+UPDATE `user` SET `is_deleted`= 1 WHERE `id` = user_id AND `is_deleted` = 0;
+END $
+DELIMITER ;
+
+------- trigger for update login table after insert a new user-------------
+DELIMITER $
+CREATE TRIGGER `TR_after_user_insert` AFTER INSERT ON `user` FOR EACH ROW 
+BEGIN
+DECLARE pwd VARCHAR(255);
+SET pwd = SHA1('hello@pwd');
+INSERT INTO `login`(`id`, `password`) VALUES (NEW.`id`, pwd);
+END $
+DELIMITER ;
+
+
+
+
+
+

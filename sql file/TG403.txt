@@ -7,8 +7,6 @@ INSERT INTO `orders_log`(`item_id`, `user_id`, `quantity`, `total_price`, `order
 END$$
 
 
-
-
 CREATE DEFINER=`root`@`localhost` PROCEDURE `cancel_order` (IN `order_id` INT)   BEGIN
 
 UPDATE `orders` SET `is_canceled`= 1 WHERE `id` = order_id AND `is_canceled` = 0;
@@ -24,14 +22,6 @@ CREATE TABLE `category` (
   `is_deleted` int DEFAULT NULL,
   `type` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- Dumping data for table category
-
-INSERT INTO `category` (`id`, `is_deleted`, `type`) VALUES
-(1, 0, 'Bakery'),
-(5, 0, 'Meals'),
-(6, 0, 'Cake'),
-(7, 0, 'Ice-cream');
 
 
 -- Triggers orders_log
